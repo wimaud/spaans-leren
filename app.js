@@ -146,6 +146,21 @@ function shuffleArray(array) {
     }
 }
 
+// === ANTWOORD VALIDATIE ===
+function validateAnswer(userInput, correctAnswer) {
+    const userAnswer = userInput.trim().toLowerCase();
+    const correct = correctAnswer.toLowerCase();
+
+    // Exacte match
+    if (userAnswer === correct) return true;
+
+    // Match zonder lidwoord (de/het/een)
+    const correctWithoutArticle = correct.replace(/^(de|het|een)\s+/, '');
+    const userWithoutArticle = userAnswer.replace(/^(de|het|een)\s+/, '');
+
+    return userWithoutArticle === correctWithoutArticle;
+}
+
 // === WOORD WEERGAVE ===
 function showCurrentWord() {
     const completionEl = document.getElementById('completion');
@@ -215,20 +230,13 @@ function checkTypingAnswer() {
     const current = remainingWords[currentWordIndex];
     const input = document.getElementById('typingInput');
     const feedback = document.getElementById('typingFeedback');
-    const userAnswer = input.value.trim().toLowerCase();
-    const correctAnswer = current.word.dutch.toLowerCase();
 
     // Verberg check knop, toon next knop
     document.getElementById('btnCheck').style.display = 'none';
     document.getElementById('btnNextWord').style.display = 'inline-block';
     input.disabled = true;
 
-    // Eenvoudige vergelijking (kan later verbeterd worden met fuzzy matching)
-    // Accepteer ook antwoorden zonder lidwoord
-    const correctWithoutArticle = correctAnswer.replace(/^(de|het|een)\s+/, '');
-    const userWithoutArticle = userAnswer.replace(/^(de|het|een)\s+/, '');
-
-    if (userAnswer === correctAnswer || userWithoutArticle === correctWithoutArticle) {
+    if (validateAnswer(input.value, current.word.dutch)) {
         // Correct!
         input.className = 'typing-input correct';
         feedback.textContent = 'Correct!';
@@ -541,8 +549,6 @@ function checkSpeedAnswer() {
 
     const current = remainingWords[currentWordIndex];
     const input = document.getElementById('speedInput');
-    const userAnswer = input.value.trim().toLowerCase();
-    const correctAnswer = current.word.dutch.toLowerCase();
 
     // Stop timer
     if (speedTimer) {
@@ -550,13 +556,9 @@ function checkSpeedAnswer() {
         speedTimer = null;
     }
 
-    // Accepteer ook antwoorden zonder lidwoord
-    const correctWithoutArticle = correctAnswer.replace(/^(de|het|een)\s+/, '');
-    const userWithoutArticle = userAnswer.replace(/^(de|het|een)\s+/, '');
-
     input.disabled = true;
 
-    if (userAnswer === correctAnswer || userWithoutArticle === correctWithoutArticle) {
+    if (validateAnswer(input.value, current.word.dutch)) {
         // Correct! Bereken punten op basis van resterende tijd
         const points = Math.floor((speedTimeLeft / SPEED_MAX_TIME) * 100);
         speedScore += points;
