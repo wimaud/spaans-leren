@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -48,7 +48,7 @@ h1 {
 
 .tab-btn.active {
     background: white;
-    color: #667eea;
+    color: #2c3e50;
 }
 
 /* Statistieken balk */
@@ -320,7 +320,7 @@ h1 {
 }
 
 .btn-restart {
-    background: #667eea;
+    background: #2c3e50;
     color: white;
     padding: 12px 30px;
     border: none;
@@ -331,7 +331,7 @@ h1 {
 }
 
 .btn-restart:hover {
-    background: #5a6fd6;
+    background: #1a252f;
 }
 
 /* Startscherm */
@@ -379,7 +379,7 @@ h1 {
 }
 
 .mode-btn:hover {
-    border-color: #667eea;
+    border-color: #2c3e50;
     transform: scale(1.02);
 }
 
@@ -444,7 +444,7 @@ h1 {
 }
 
 .typing-input:focus {
-    border-color: #667eea;
+    border-color: #2c3e50;
 }
 
 .typing-input.correct {
@@ -458,12 +458,12 @@ h1 {
 }
 
 .btn-check {
-    background: #667eea;
+    background: #2c3e50;
     color: white;
 }
 
 .btn-check:hover {
-    background: #5a6fd6;
+    background: #1a252f;
     transform: scale(1.05);
 }
 
@@ -515,5 +515,5 @@ h1 {
 .speaker-btn:hover {
     opacity: 1;
     transform: scale(1.1);
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(44, 62, 80, 0.1);
 }
