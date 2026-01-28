@@ -24,6 +24,11 @@
                     <span class="mode-title">Typen</span>
                     <span class="mode-desc">Typ de vertaling zelf in</span>
                 </button>
+                <button class="mode-btn speed-mode-btn" onclick="startMode('speed')">
+                    <span class="mode-icon">⚡</span>
+                    <span class="mode-title">Speed Mode</span>
+                    <span class="mode-desc">Race tegen de klok voor punten!</span>
+                </button>
             </div>
         </div>
 
@@ -97,6 +102,46 @@
                     <div id="typingFeedback" class="typing-feedback"></div>
                     <button id="btnNextWord" class="btn btn-next" style="display: none;">Volgend woord</button>
                 </div>
+            </div>
+
+            <!-- Speed modus -->
+            <div id="speedMode" class="mode-content" style="display: none;">
+                <div class="speed-card">
+                    <div class="speed-header">
+                        <div class="speed-timer" id="speedTimer">15</div>
+                        <div class="speed-info">
+                            <div class="speed-score">Score: <span id="speedScore">0</span></div>
+                            <div class="speed-progress">Woord <span id="speedWordNum">1</span>/10</div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard-label">Spaans</div>
+                    <div class="word-with-speaker">
+                        <span class="flashcard-word" id="speedSpanishWord">hola</span>
+                        <button class="speaker-btn" onclick="speakWord(event)" title="Luister">🔊</button>
+                    </div>
+
+                    <div class="speed-input-container">
+                        <input type="text" id="speedInput" class="typing-input" placeholder="Typ de Nederlandse vertaling..." autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speed eindscherm -->
+            <div id="speedResult" class="speed-result">
+                <h2>Speed Mode Voltooid!</h2>
+                <div class="speed-final-score">
+                    <div class="score-label">Je score</div>
+                    <div class="score-value" id="speedFinalScore">0</div>
+                </div>
+                <div class="speed-high-score">
+                    High Score: <span id="speedHighScoreDisplay">0</span>
+                </div>
+                <div class="speed-new-record" id="speedNewRecord" style="display: none;">
+                    Nieuw record!
+                </div>
+                <button class="btn-restart" id="btnSpeedRestart">Opnieuw spelen</button>
+                <button class="btn-back-home" id="btnSpeedHome">Terug naar menu</button>
             </div>
 
             <!-- Sessie voltooid -->

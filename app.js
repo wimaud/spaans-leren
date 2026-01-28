@@ -2,7 +2,16 @@
 let currentWordIndex = 0;
 let remainingWords = [];
 let progress = {};
-let currentMode = 'flashcard'; // 'flashcard' of 'typing'
+let currentMode = 'flashcard'; // 'flashcard', 'typing' of 'speed'
+
+// === SPEED MODE STATE ===
+let speedScore = 0;
+let speedTimer = null;
+let speedTimeLeft = 15;
+let speedWordCount = 0;
+let speedHighScore = 0;
+const SPEED_MAX_TIME = 15;
+const SPEED_TOTAL_WORDS = 10;
 
 // === TEKST NAAR SPRAAK ===
 function speakWord(event) {
@@ -11,7 +20,7 @@ function speakWord(event) {
         event.stopPropagation();
     }
 
-    // Haal het huidige Spaanse woord op
+    // Haal het huidige Spaanse woord op - werkt voor alle modi
     const current = remainingWords[currentWordIndex];
     if (!current) return;
 
@@ -35,7 +44,9 @@ function speakWord(event) {
 // === INITIALISATIE ===
 function init() {
     loadProgress();
+    loadSpeedHighScore();
     setupEventListeners();
+    setupSpeedEventListeners();
     updateStats();
     renderWordsList();
     // Start niet automatisch - wacht op moduskeuze
@@ -49,22 +60,36 @@ function startMode(mode) {
     document.getElementById('startScreen').classList.remove('active');
     document.getElementById('mainApp').classList.add('active');
 
+    // Verberg alle modes eerst
+    document.getElementById('flashcardMode').style.display = 'none';
+    document.getElementById('typingMode').style.display = 'none';
+    document.getElementById('speedMode').style.display = 'none';
+    document.getElementById('speedResult').classList.remove('active');
+
     // Toon juiste modus
     if (mode === 'flashcard') {
         document.getElementById('flashcardMode').style.display = 'block';
-        document.getElementById('typingMode').style.display = 'none';
-    } else {
-        document.getElementById('flashcardMode').style.display = 'none';
+        startSession();
+    } else if (mode === 'typing') {
         document.getElementById('typingMode').style.display = 'block';
+        startSession();
+    } else if (mode === 'speed') {
+        document.getElementById('speedMode').style.display = 'block';
+        startSpeedRound();
     }
-
-    startSession();
 }
 
 function backToStart() {
+    // Stop speed timer als die loopt
+    if (speedTimer) {
+        clearInterval(speedTimer);
+        speedTimer = null;
+    }
+
     document.getElementById('mainApp').classList.remove('active');
     document.getElementById('startScreen').classList.add('active');
     document.getElementById('completion').classList.remove('active');
+    document.getElementById('speedResult').classList.remove('active');
 }
 
 // === LOCAL STORAGE ===
@@ -409,6 +434,192 @@ function setupEventListeners() {
                 markWrong();
             } else if (e.key === 'ArrowRight' || e.key === '2') {
                 markCorrect();
+            }
+        }
+    });
+}
+
+// === SPEED MODE ===
+function loadSpeedHighScore() {
+    const saved = localStorage.getItem('speedHighScore');
+    if (saved) {
+        speedHighScore = parseInt(saved, 10);
+    }
+}
+
+function saveSpeedHighScore() {
+    localStorage.setItem('speedHighScore', speedHighScore.toString());
+}
+
+function startSpeedRound() {
+    loadSpeedHighScore();
+    speedScore = 0;
+    speedWordCount = 0;
+
+    // Selecteer 10 willekeurige woorden
+    remainingWords = words
+        .map((word, index) => ({ word, index }))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, SPEED_TOTAL_WORDS);
+
+    currentWordIndex = 0;
+    updateSpeedDisplay();
+    showSpeedWord();
+}
+
+function updateSpeedDisplay() {
+    document.getElementById('speedScore').textContent = speedScore;
+    document.getElementById('speedWordNum').textContent = speedWordCount + 1;
+}
+
+function showSpeedWord() {
+    if (currentWordIndex >= remainingWords.length) {
+        endSpeedSession();
+        return;
+    }
+
+    const current = remainingWords[currentWordIndex];
+    document.getElementById('speedSpanishWord').textContent = current.word.spanish;
+
+    // Reset input
+    const input = document.getElementById('speedInput');
+    input.value = '';
+    input.className = 'typing-input';
+    input.disabled = false;
+    input.focus();
+
+    // Start timer
+    speedTimeLeft = SPEED_MAX_TIME;
+    updateTimerDisplay();
+    startSpeedTimer();
+}
+
+function startSpeedTimer() {
+    if (speedTimer) {
+        clearInterval(speedTimer);
+    }
+
+    speedTimer = setInterval(() => {
+        speedTimeLeft--;
+        updateTimerDisplay();
+
+        if (speedTimeLeft <= 0) {
+            clearInterval(speedTimer);
+            speedTimer = null;
+            speedTimeUp();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const timerEl = document.getElementById('speedTimer');
+    timerEl.textContent = speedTimeLeft;
+
+    if (speedTimeLeft <= 5) {
+        timerEl.classList.add('warning');
+    } else {
+        timerEl.classList.remove('warning');
+    }
+}
+
+function speedTimeUp() {
+    // Tijd is op - 0 punten, ga naar volgende woord
+    const input = document.getElementById('speedInput');
+    input.disabled = true;
+    input.className = 'typing-input wrong';
+
+    speedWordCount++;
+    currentWordIndex++;
+
+    setTimeout(() => {
+        showSpeedWord();
+    }, 800);
+}
+
+function checkSpeedAnswer() {
+    if (currentMode !== 'speed') return;
+
+    const current = remainingWords[currentWordIndex];
+    const input = document.getElementById('speedInput');
+    const userAnswer = input.value.trim().toLowerCase();
+    const correctAnswer = current.word.dutch.toLowerCase();
+
+    // Stop timer
+    if (speedTimer) {
+        clearInterval(speedTimer);
+        speedTimer = null;
+    }
+
+    // Accepteer ook antwoorden zonder lidwoord
+    const correctWithoutArticle = correctAnswer.replace(/^(de|het|een)\s+/, '');
+    const userWithoutArticle = userAnswer.replace(/^(de|het|een)\s+/, '');
+
+    input.disabled = true;
+
+    if (userAnswer === correctAnswer || userWithoutArticle === correctWithoutArticle) {
+        // Correct! Bereken punten op basis van resterende tijd
+        const points = Math.floor((speedTimeLeft / SPEED_MAX_TIME) * 100);
+        speedScore += points;
+        input.className = 'typing-input correct';
+    } else {
+        // Fout - 0 punten
+        input.className = 'typing-input wrong';
+    }
+
+    speedWordCount++;
+    currentWordIndex++;
+    updateSpeedDisplay();
+
+    setTimeout(() => {
+        showSpeedWord();
+    }, 600);
+}
+
+function endSpeedSession() {
+    // Stop timer als die nog loopt
+    if (speedTimer) {
+        clearInterval(speedTimer);
+        speedTimer = null;
+    }
+
+    // Verberg speed card, toon resultaat
+    document.getElementById('speedMode').style.display = 'none';
+    document.getElementById('speedResult').classList.add('active');
+
+    // Toon score
+    document.getElementById('speedFinalScore').textContent = speedScore;
+    document.getElementById('speedHighScoreDisplay').textContent = speedHighScore;
+
+    // Check voor nieuw record
+    const newRecordEl = document.getElementById('speedNewRecord');
+    if (speedScore > speedHighScore) {
+        speedHighScore = speedScore;
+        saveSpeedHighScore();
+        document.getElementById('speedHighScoreDisplay').textContent = speedHighScore;
+        newRecordEl.style.display = 'inline-block';
+    } else {
+        newRecordEl.style.display = 'none';
+    }
+}
+
+function restartSpeedSession() {
+    document.getElementById('speedResult').classList.remove('active');
+    document.getElementById('speedMode').style.display = 'block';
+    startSpeedRound();
+}
+
+// === EVENT LISTENERS SPEED MODE ===
+function setupSpeedEventListeners() {
+    document.getElementById('btnSpeedRestart').addEventListener('click', restartSpeedSession);
+    document.getElementById('btnSpeedHome').addEventListener('click', backToStart);
+
+    // Enter voor speed mode
+    document.getElementById('speedInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && currentMode === 'speed') {
+            e.preventDefault();
+            const input = document.getElementById('speedInput');
+            if (!input.disabled && input.value.trim() !== '') {
+                checkSpeedAnswer();
             }
         }
     });
