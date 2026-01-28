@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaans Leren - Flashcards</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Spaans Leren</h1>
+
+        <!-- Startscherm -->
+        <div id="startScreen" class="start-screen active">
+            <div class="mode-selection">
+                <h2>Kies je leermethode</h2>
+                <button class="mode-btn" onclick="startMode('flashcard')">
+                    <span class="mode-icon">🔄</span>
+                    <span class="mode-title">Flashcards</span>
+                    <span class="mode-desc">Bekijk het woord en onthoud de vertaling</span>
+                </button>
+                <button class="mode-btn" onclick="startMode('typing')">
+                    <span class="mode-icon">⌨️</span>
+                    <span class="mode-title">Typen</span>
+                    <span class="mode-desc">Typ de vertaling zelf in</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Hoofd app (verborgen tot modus gekozen) -->
+        <div id="mainApp" class="main-app">
+            <!-- Navigatie tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('practice')">Oefenen</button>
+                <button class="tab-btn" onclick="showTab('progress')">Voortgang</button>
+                <button class="tab-btn" onclick="backToStart()">Andere modus</button>
+            </div>
+
+            <!-- Statistieken balk -->
+            <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-number" id="statKnown">0</div>
+                <div class="stat-label">Gekend</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="statLearning">0</div>
+                <div class="stat-label">Aan het leren</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="statNew">0</div>
+                <div class="stat-label">Nieuw</div>
+            </div>
+        </div>
+
+        <!-- Oefenpagina -->
+        <div id="practicePage" class="practice-page active">
+
+            <!-- Flashcard modus -->
+            <div id="flashcardMode" class="mode-content">
+                <div class="flashcard-container">
+                    <div class="flashcard" id="flashcard">
+                        <div class="flashcard-front">
+                            <div class="flashcard-label">Spaans</div>
+                            <div class="word-with-speaker">
+                                <span class="flashcard-word" id="spanishWord">hola</span>
+                                <button class="speaker-btn" onclick="speakWord(event)" title="Luister">🔊</button>
+                            </div>
+                            <div class="flashcard-hint">Klik om te draaien</div>
+                        </div>
+                        <div class="flashcard-back">
+                            <div class="flashcard-label">Nederlands</div>
+                            <div class="flashcard-word" id="dutchWord">hallo</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons" id="buttons">
+                    <button class="btn btn-wrong" id="btnWrong">Wist ik niet</button>
+                    <button class="btn btn-correct" id="btnCorrect">Wist ik!</button>
+                </div>
+            </div>
+
+            <!-- Typing modus -->
+            <div id="typingMode" class="mode-content" style="display: none;">
+                <div class="typing-card">
+                    <div class="flashcard-label">Spaans</div>
+                    <div class="word-with-speaker">
+                        <span class="flashcard-word" id="typingSpanishWord">hola</span>
+                        <button class="speaker-btn" onclick="speakWord(event)" title="Luister">🔊</button>
+                    </div>
+
+                    <div class="typing-input-container">
+                        <input type="text" id="typingInput" class="typing-input" placeholder="Typ de Nederlandse vertaling..." autocomplete="off">
+                        <button class="btn btn-check" id="btnCheck">Controleer</button>
+                    </div>
+
+                    <div id="typingFeedback" class="typing-feedback"></div>
+                    <button id="btnNextWord" class="btn btn-next" style="display: none;">Volgend woord</button>
+                </div>
+            </div>
+
+            <!-- Sessie voltooid -->
+            <div class="completion-message" id="completion">
+                <h2>Sessie voltooid!</h2>
+                <p>Je hebt alle woorden van deze sessie geoefend.</p>
+                <button class="btn-restart" id="btnRestart">Opnieuw oefenen</button>
+            </div>
+        </div>
+
+        <!-- Voortgang pagina -->
+        <div id="progressPage" class="progress-page">
+            <div class="progress-section">
+                <h2>Totale voortgang</h2>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%">0%</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <h2>Alle woorden</h2>
+                <div class="words-list" id="wordsList">
+                    <!-- Wordt gevuld door JavaScript -->
+                </div>
+                <button class="btn-reset" id="btnReset">Reset alle voortgang</button>
+            </div>
+        </div>
+        </div><!-- einde mainApp -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="words.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
