@@ -373,6 +373,12 @@ function showTab(tabName) {
     } else {
         document.getElementById('progressPage').classList.add('active');
     }
+
+    // Stop speed timer bij navigatie weg van practice
+    if (tabName !== 'practice' && speedTimer) {
+        clearInterval(speedTimer);
+        speedTimer = null;
+    }
 }
 
 // === RESET ===
